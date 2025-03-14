@@ -1,4 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -14,16 +21,24 @@ export const users = pgTable("users", {
 
 export const friends = pgTable("friends", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  friendId: integer("friend_id").notNull().references(() => users.id),
-  status: text("status").default("pending").notNull(), // pending, accepted, rejected
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  friendId: integer("friend_id")
+    .notNull()
+    .references(() => users.id),
+  status: text("status").default("pending").notNull(), // pending, accepted, rejected one
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  senderId: integer("sender_id").notNull().references(() => users.id),
-  receiverId: integer("receiver_id").notNull().references(() => users.id),
+  senderId: integer("sender_id")
+    .notNull()
+    .references(() => users.id),
+  receiverId: integer("receiver_id")
+    .notNull()
+    .references(() => users.id),
   content: text("content").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   status: text("status").default("sent").notNull(), // sent, delivered, read
