@@ -67,6 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Friend request not found" });
       }
       
+      // Only the recipient (friendId) can accept or reject the request
       if (friendRequest.friendId !== req.user.id) {
         return res.status(403).json({ error: "Not authorized to update this request" });
       }
@@ -75,6 +76,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedRequest);
     } catch (error) {
       res.status(500).json({ error: "Failed to update friend request" });
+    }
+  });
+  
+  // Delete (cancel) a friend request
+  app.delete("/api/friends/request/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send("Unauthorized");
+    
+    const { id } = req.params;
+    
+    try {
+      const friendRequest = await storage.getFriendRequest(parseInt(id));
+      if (!friendRequest) {
+        return res.status(404).json({ error: "Friend request not found" });
+      }
+      
+      // Only the sender (userId) can cancel their own request
+      if (friendRequest.userId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized to cancel this request" });
+      }
+      
+      await storage.removeFriend(parseInt(id));
+      res.status(200).json({ message: "Friend request canceled successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to cancel friend request" });
     }
   });
   

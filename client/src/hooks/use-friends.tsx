@@ -19,6 +19,7 @@ type FriendsContextType = {
   acceptFriendRequest: (id: number) => void;
   rejectFriendRequest: (id: number) => void;
   removeFriend: (id: number) => void;
+  cancelFriendRequest: (id: number) => void;
   isPendingAction: boolean;
 };
 
@@ -101,6 +102,27 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Cancel a friend request that you sent
+  const cancelFriendRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/friends/request/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+      toast({
+        title: "Friend request canceled",
+        description: "Your friend request has been canceled.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to cancel friend request",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <FriendsContext.Provider
       value={{
@@ -111,10 +133,12 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
         acceptFriendRequest: (id) => respondToFriendRequestMutation.mutate({ id, status: "accepted" }),
         rejectFriendRequest: (id) => respondToFriendRequestMutation.mutate({ id, status: "rejected" }),
         removeFriend: (id) => removeFriendMutation.mutate(id),
+        cancelFriendRequest: (id) => cancelFriendRequestMutation.mutate(id),
         isPendingAction: 
           sendFriendRequestMutation.isPending || 
           respondToFriendRequestMutation.isPending || 
-          removeFriendMutation.isPending,
+          removeFriendMutation.isPending ||
+          cancelFriendRequestMutation.isPending,
       }}
     >
       {children}

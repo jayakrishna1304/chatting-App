@@ -230,8 +230,8 @@ export default function LeftSidebar() {
                         variant="default" 
                         size="sm" 
                         className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-                        onClick={() => acceptFriendRequest(request.id)}
-                        disabled={isPendingAction}
+                        onClick={() => request.id !== undefined && acceptFriendRequest(request.id)}
+                        disabled={isPendingAction || request.id === undefined}
                       >
                         <UserCheck className="h-4 w-4 mr-1" />
                         Accept
@@ -240,8 +240,8 @@ export default function LeftSidebar() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => rejectFriendRequest(request.id)}
-                        disabled={isPendingAction}
+                        onClick={() => request.id !== undefined && rejectFriendRequest(request.id)}
+                        disabled={isPendingAction || request.id === undefined}
                       >
                         <UserX className="h-4 w-4 mr-1" />
                         Decline
@@ -278,6 +278,16 @@ export default function LeftSidebar() {
                         <p className="text-sm font-medium text-white">{request.friend.username}</p>
                         <p className="text-xs text-indigo-300">Request pending</p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-indigo-300 hover:text-white hover:bg-indigo-700/50"
+                        onClick={() => request.id !== undefined && cancelFriendRequest(request.id)}
+                        disabled={isPendingAction || request.id === undefined}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Cancel request</span>
+                      </Button>
                     </div>
                   </div>
                 ))}
