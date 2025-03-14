@@ -112,6 +112,10 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
   // Cancel a friend request that you sent
   const cancelFriendRequestMutation = useMutation({
     mutationFn: async (id: number) => {
+      // Send cancellation via WebSocket for real-time notification
+      sendMessage("cancelFriendRequest", { requestId: id });
+      
+      // Also update via the REST API
       await apiRequest("DELETE", `/api/friends/request/${id}`);
     },
     onSuccess: () => {

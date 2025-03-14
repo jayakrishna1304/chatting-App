@@ -139,6 +139,20 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         window.dispatchEvent(responseEvent);
         break;
         
+      case "friendRequestCancelled":
+        // Friend request was cancelled by the sender
+        queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+        
+        // Dispatch a custom event for the cancellation notification
+        const cancellationEvent = new CustomEvent('friend-request-cancelled', { 
+          detail: {
+            requestId: data.payload.requestId,
+            senderId: data.payload.senderId
+          } 
+        });
+        window.dispatchEvent(cancellationEvent);
+        break;
+        
       case "statusUpdate":
         // Friend's status changed (online/offline)
         queryClient.invalidateQueries({ queryKey: ["/api/friends"] });

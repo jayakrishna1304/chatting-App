@@ -133,6 +133,30 @@ export function setupWebSockets(wss: WebSocketServer) {
             }
           }
         }
+        // Handle cancellation of sent friend requests
+        else if (type === "cancelFriendRequest" && ws.userId) {
+          const friendRequest = await storage.getFriendRequest(payload.requestId);
+          
+          if (friendRequest && friendRequest.userId === ws.userId) {
+            // Get the receiver before removing the request
+            const receiverId = friendRequest.friendId;
+            
+            // Remove the friend request
+            await storage.removeFriend(payload.requestId);
+            
+            // Notify the receiver of cancellation if online
+            const receiverWs = connections.get(receiverId);
+            if (receiverWs && receiverWs.readyState === WebSocket.OPEN) {
+              receiverWs.send(JSON.stringify({
+                type: "friendRequestCancelled",
+                payload: {
+                  requestId: payload.requestId,
+                  senderId: ws.userId
+                }
+              }));
+            }
+          }
+        }
         // Handle read receipts
         else if (type === "messageRead" && ws.userId) {
           const message = await storage.getMessageById(payload.messageId);

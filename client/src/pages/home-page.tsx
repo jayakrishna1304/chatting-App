@@ -95,14 +95,59 @@ function WebSocketHandler({
       }, 5000);
     };
     
+    const handleFriendRequestResponse = (event: CustomEvent) => {
+      const { status, responderId } = event.detail;
+      const responseText = status === "accepted" 
+        ? "accepted your friend request!" 
+        : "declined your friend request";
+      
+      setNotification({
+        id: Date.now(),
+        sender: {
+          id: responderId,
+          username: "Friend Update"
+        },
+        message: `Someone ${responseText}`
+      });
+      setShowNotification(true);
+      
+      // Auto hide notification after 5 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+    };
+    
+    const handleFriendRequestCancelled = (event: CustomEvent) => {
+      const { senderId } = event.detail;
+      
+      setNotification({
+        id: Date.now(),
+        sender: {
+          id: senderId,
+          username: "Friend Update"
+        },
+        message: "A friend request was cancelled"
+      });
+      setShowNotification(true);
+      
+      // Auto hide notification after 5 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+    };
+    
     // Add event listeners for custom events dispatched by WebSocketProvider
     window.addEventListener('friend-request', handleFriendRequest as EventListener);
     window.addEventListener('new-message', handleNewMessage as EventListener);
+    window.addEventListener('friend-request-response', handleFriendRequestResponse as EventListener);
+    window.addEventListener('friend-request-cancelled', handleFriendRequestCancelled as EventListener);
     
     return () => {
       // Clean up event listeners
       window.removeEventListener('friend-request', handleFriendRequest as EventListener);
       window.removeEventListener('new-message', handleNewMessage as EventListener);
+      window.removeEventListener('friend-request-response', handleFriendRequestResponse as EventListener);
+      window.removeEventListener('friend-request-cancelled', handleFriendRequestCancelled as EventListener);
     };
   }, [isConnected, setShowFriendRequest, setPendingRequest, setShowNotification, setNotification]);
   
