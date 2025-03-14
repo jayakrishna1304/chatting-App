@@ -51,12 +51,26 @@ export function setupWebSockets(wss: WebSocketServer) {
           // Save message to storage
           const savedMessage = await storage.createMessage(messageData);
           
+          // Get sender info to include in notification
+          const sender = await storage.getUser(ws.userId!);
+          
           // Send to receiver if online
           const receiverWs = connections.get(payload.receiverId);
           if (receiverWs && receiverWs.readyState === WebSocket.OPEN) {
+            // Add sender info to the message for display purposes
+            const messageWithSender = {
+              ...savedMessage,
+              sender: {
+                id: sender?.id,
+                username: sender?.username,
+                avatar: sender?.avatar,
+                status: sender?.status
+              }
+            };
+            
             receiverWs.send(JSON.stringify({
               type: "message",
-              payload: savedMessage
+              payload: messageWithSender
             }));
             
             // Update message status to delivered

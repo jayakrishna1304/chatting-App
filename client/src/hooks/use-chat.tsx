@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Message } from "@shared/schema";
 import { apiRequest, queryClient } from "../lib/queryClient";
@@ -86,6 +86,38 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
     },
   });
+
+  // Listen for new messages to show notifications
+  useEffect(() => {
+    const handleNewMessage = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const message: Message = customEvent.detail;
+      
+      // Show notification only if the message is not from the current user
+      // and not from the currently selected friend
+      if (user && message.senderId !== user.id && message.senderId !== selectedFriend) {
+        toast({
+          title: "New message",
+          description: `${message.content.substring(0, 30)}${message.content.length > 30 ? '...' : ''}`,
+          variant: "default",
+          action: (
+            <button 
+              className="bg-indigo-500 hover:bg-indigo-600 text-white rounded px-2 py-1 text-xs"
+              onClick={() => selectFriend(message.senderId)}
+            >
+              View
+            </button>
+          )
+        });
+      }
+    };
+    
+    window.addEventListener('new-message', handleNewMessage as EventListener);
+    
+    return () => {
+      window.removeEventListener('new-message', handleNewMessage as EventListener);
+    };
+  }, [user, selectedFriend, toast]);
 
   const selectFriend = (friendId: number) => {
     setSelectedFriend(friendId);

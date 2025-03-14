@@ -74,10 +74,17 @@ function WebSocketHandler({
       const request = event.detail;
       setPendingRequest(request);
       setShowFriendRequest(true);
+      
+      // Play a notification sound for friend requests
+      const audio = new Audio("/message-notification.mp3");
+      audio.volume = 0.6; // Slightly louder than chat notifications
+      audio.play().catch(err => console.log("Could not play friend request notification sound", err));
     };
     
     const handleNewMessage = (event: CustomEvent) => {
       const message = event.detail;
+      
+      // Enhanced notification with better sender info
       setNotification({
         id: message.id,
         sender: {
@@ -89,6 +96,11 @@ function WebSocketHandler({
       });
       setShowNotification(true);
       
+      // Play a notification sound
+      const audio = new Audio("/message-notification.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(err => console.log("Could not play notification sound", err));
+      
       // Auto hide notification after 5 seconds
       setTimeout(() => {
         setShowNotification(false);
@@ -96,7 +108,7 @@ function WebSocketHandler({
     };
     
     const handleFriendRequestResponse = (event: CustomEvent) => {
-      const { status, responderId } = event.detail;
+      const { status, responderId, responderUsername } = event.detail;
       const responseText = status === "accepted" 
         ? "accepted your friend request!" 
         : "declined your friend request";
@@ -105,11 +117,17 @@ function WebSocketHandler({
         id: Date.now(),
         sender: {
           id: responderId,
-          username: "Friend Update"
+          username: responderUsername || "Friend Update",
+          avatar: event.detail.responderAvatar
         },
-        message: `Someone ${responseText}`
+        message: `${responderUsername || "Someone"} ${responseText}`
       });
       setShowNotification(true);
+      
+      // Play notification sound
+      const audio = new Audio("/message-notification.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(err => console.log("Could not play notification sound", err));
       
       // Auto hide notification after 5 seconds
       setTimeout(() => {
@@ -118,17 +136,23 @@ function WebSocketHandler({
     };
     
     const handleFriendRequestCancelled = (event: CustomEvent) => {
-      const { senderId } = event.detail;
+      const { senderId, senderUsername } = event.detail;
       
       setNotification({
         id: Date.now(),
         sender: {
           id: senderId,
-          username: "Friend Update"
+          username: senderUsername || "Friend Update",
+          avatar: event.detail.senderAvatar
         },
-        message: "A friend request was cancelled"
+        message: `${senderUsername || "Someone"} cancelled their friend request`
       });
       setShowNotification(true);
+      
+      // Play notification sound
+      const audio = new Audio("/message-notification.mp3");
+      audio.volume = 0.4; // Slightly quieter for cancellations
+      audio.play().catch(err => console.log("Could not play notification sound", err));
       
       // Auto hide notification after 5 seconds
       setTimeout(() => {
