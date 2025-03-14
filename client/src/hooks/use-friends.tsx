@@ -8,6 +8,7 @@ import { useAuth } from "./use-auth";
 type FriendWithStatus = {
   friend: User;
   status: string;
+  id?: number; // Friendship ID for handling requests
 };
 
 type FriendsContextType = {

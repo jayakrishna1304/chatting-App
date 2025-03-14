@@ -110,7 +110,11 @@ export class MemStorage implements IStorage {
       const friendId = friendship.userId === userId ? friendship.friendId : friendship.userId;
       const friend = this.users.get(friendId);
       if (friend) {
-        result.push({ friend, status: "accepted" });
+        result.push({ 
+          friend, 
+          status: "accepted",
+          id: friendship.id // Include the friendship ID
+        });
       }
     }
     
@@ -118,7 +122,11 @@ export class MemStorage implements IStorage {
     for (const request of pendingRequests) {
       const requester = this.users.get(request.userId);
       if (requester) {
-        result.push({ friend: requester, status: "pending" });
+        result.push({ 
+          friend: requester, 
+          status: "pending",
+          id: request.id // Include the request ID
+        });
       }
     }
     

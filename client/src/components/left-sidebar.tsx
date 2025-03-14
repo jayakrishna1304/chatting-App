@@ -44,9 +44,9 @@ export default function LeftSidebar() {
   const [newFriendUsername, setNewFriendUsername] = useState("");
   const [activeTab, setActiveTab] = useState("chats");
   
-  // Get pending friend requests
-  const pendingRequests = friends.filter(f => f.status === "pending" && f.userId !== user?.id);
-  const sentRequests = friends.filter(f => f.status === "pending" && f.userId === user?.id);
+  // Get pending friend requests and add request id
+  const pendingRequests = friends.filter(f => f.status === "pending" && f.friend.id !== user?.id);
+  const sentRequests = friends.filter(f => f.status === "pending" && f.friend.id === user?.id);
   
   // Filter friends by search term and accepted status
   const acceptedFriends = friends.filter(f => 
