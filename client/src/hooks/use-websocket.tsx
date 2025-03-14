@@ -133,7 +133,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           detail: {
             requestId: data.payload.requestId,
             status: data.payload.status,
-            responderId: data.payload.responderId
+            responderId: data.payload.responderId,
+            responderUsername: data.payload.responderUsername,
+            responderAvatar: data.payload.responderAvatar
           } 
         });
         window.dispatchEvent(responseEvent);
@@ -147,7 +149,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         const cancellationEvent = new CustomEvent('friend-request-cancelled', { 
           detail: {
             requestId: data.payload.requestId,
-            senderId: data.payload.senderId
+            senderId: data.payload.senderId,
+            senderUsername: data.payload.senderUsername,
+            senderAvatar: data.payload.senderAvatar
           } 
         });
         window.dispatchEvent(cancellationEvent);

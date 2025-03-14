@@ -136,12 +136,17 @@ export function setupWebSockets(wss: WebSocketServer) {
             // Notify the original requester if online
             const requesterWs = connections.get(friendRequest.userId);
             if (requesterWs && requesterWs.readyState === WebSocket.OPEN) {
+              // Get responder info to include in notification
+              const responder = await storage.getUser(ws.userId!);
+              
               requesterWs.send(JSON.stringify({
                 type: "friendRequestResponse",
                 payload: {
                   requestId: payload.requestId,
                   status: payload.status,
-                  responderId: ws.userId
+                  responderId: ws.userId,
+                  responderUsername: responder?.username,
+                  responderAvatar: responder?.avatar
                 }
               }));
             }
@@ -161,11 +166,16 @@ export function setupWebSockets(wss: WebSocketServer) {
             // Notify the receiver of cancellation if online
             const receiverWs = connections.get(receiverId);
             if (receiverWs && receiverWs.readyState === WebSocket.OPEN) {
+              // Get sender info to include in cancellation notification
+              const sender = await storage.getUser(ws.userId!);
+              
               receiverWs.send(JSON.stringify({
                 type: "friendRequestCancelled",
                 payload: {
                   requestId: payload.requestId,
-                  senderId: ws.userId
+                  senderId: ws.userId,
+                  senderUsername: sender?.username,
+                  senderAvatar: sender?.avatar
                 }
               }));
             }
