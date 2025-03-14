@@ -96,6 +96,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         queryClient.setQueryData(["/api/messages", message.senderId], (oldData: Message[] = []) => 
           [...oldData, message]
         );
+        
+        // Dispatch a custom event for the message notification
+        const messageEvent = new CustomEvent('new-message', { detail: message });
+        window.dispatchEvent(messageEvent);
         break;
         
       case "messageSent":
@@ -112,7 +116,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         
       case "friendRequest":
         // New friend request received
+        const friendRequest = data.payload as Friend;
         queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+        
+        // Dispatch a custom event for the friend request notification
+        const requestEvent = new CustomEvent('friend-request', { detail: friendRequest });
+        window.dispatchEvent(requestEvent);
         break;
         
       case "statusUpdate":
