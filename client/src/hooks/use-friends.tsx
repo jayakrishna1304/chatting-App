@@ -4,6 +4,7 @@ import { User } from "@shared/schema";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "./use-auth";
+import { useWebSocket } from "./use-websocket";
 
 type FriendWithStatus = {
   friend: User;
@@ -59,8 +60,14 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const { sendMessage } = useWebSocket();
+
   const respondToFriendRequestMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      // Send the response via WebSocket for real-time notification
+      sendMessage("friendRequestResponse", { requestId: id, status });
+      
+      // Also update via the REST API
       const res = await apiRequest("PUT", `/api/friends/request/${id}`, { status });
       return await res.json();
     },

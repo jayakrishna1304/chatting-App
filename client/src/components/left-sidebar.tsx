@@ -36,7 +36,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LeftSidebar() {
   const { user, logoutMutation } = useAuth();
-  const { friends, isLoading, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, isPendingAction } = useFriends();
+  const { friends, isLoading, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, cancelFriendRequest, isPendingAction } = useFriends();
   const { selectFriend, selectedFriend } = useChat();
   
   const [searchTerm, setSearchTerm] = useState("");

@@ -108,6 +108,31 @@ export function setupWebSockets(wss: WebSocketServer) {
             }));
           }
         }
+        // Handle friend request responses (accept/reject)
+        else if (type === "friendRequestResponse" && ws.userId) {
+          const friendRequest = await storage.getFriendRequest(payload.requestId);
+          
+          if (friendRequest && friendRequest.friendId === ws.userId) {
+            // Update the request status
+            const updatedRequest = await storage.updateFriendRequest(
+              payload.requestId, 
+              payload.status // "accepted" or "rejected"
+            );
+            
+            // Notify the original requester if online
+            const requesterWs = connections.get(friendRequest.userId);
+            if (requesterWs && requesterWs.readyState === WebSocket.OPEN) {
+              requesterWs.send(JSON.stringify({
+                type: "friendRequestResponse",
+                payload: {
+                  requestId: payload.requestId,
+                  status: payload.status,
+                  responderId: ws.userId
+                }
+              }));
+            }
+          }
+        }
         // Handle read receipts
         else if (type === "messageRead" && ws.userId) {
           const message = await storage.getMessageById(payload.messageId);

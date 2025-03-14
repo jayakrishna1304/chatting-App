@@ -124,6 +124,21 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         window.dispatchEvent(requestEvent);
         break;
         
+      case "friendRequestResponse":
+        // Friend request was accepted or rejected
+        queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+        
+        // Dispatch a custom event for the friend request response notification
+        const responseEvent = new CustomEvent('friend-request-response', { 
+          detail: {
+            requestId: data.payload.requestId,
+            status: data.payload.status,
+            responderId: data.payload.responderId
+          } 
+        });
+        window.dispatchEvent(responseEvent);
+        break;
+        
       case "statusUpdate":
         // Friend's status changed (online/offline)
         queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
